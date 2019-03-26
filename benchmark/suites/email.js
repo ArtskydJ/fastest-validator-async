@@ -19,8 +19,8 @@ const obj = {
 
 	let check = v.compile(schema);
 
-	bench.add("mode: 'precise'", () => {
-		let res = check(obj);
+	bench.add("mode: 'precise'", async () => {
+		let res = await check(obj);
 		if (res !== true)
 			throw new Error("Validation error!", res);
 	});
@@ -34,8 +34,8 @@ const obj = {
 
 	let check = v.compile(schema);
 
-	bench.add("mode: 'basic'", () => {
-		let res = check(obj);
+	bench.add("mode: 'basic'", async () => {
+		let res = await check(obj);
 		if (res !== true)
 			throw new Error("Validation error!", res);
 	});

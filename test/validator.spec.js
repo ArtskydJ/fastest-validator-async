@@ -65,8 +65,8 @@ describe("Test validate", () => {
 		name: "John"
 	};
 
-	it("should call compile & compiled check function", () => {
-		let res = v.validate(obj, schema);
+	it("should call compile & compiled check function", async () => {
+		let res = await v.validate(obj, schema);
 		expect(res).toBe(true);
 		expect(v.compile).toHaveBeenCalledTimes(1);
 		expect(v.compile).toHaveBeenCalledWith(schema);
@@ -91,14 +91,14 @@ describe("Test add", () => {
 		expect(v.rules.myValidator).toBeDefined();
 	});
 
-	it("should call the new validator", () => {
+	it("should call the new validator", async () => {
 		const schema = {
 			a: { type: "myValidator" }
 		};
 
 		const obj = { a: 5 };
 
-		v.validate(obj, schema);
+		await v.validate(obj, schema);
 
 		expect(validFn).toHaveBeenCalledTimes(1);
 		expect(validFn).toHaveBeenCalledWith(5, schema.a, "a", obj);
@@ -239,9 +239,9 @@ describe("Test compile (integration test)", () => {
 			expect(check).toBeInstanceOf(Function);
 		});
 
-		it("should call rules validators", () => {
+		it("should call rules validators", async () => {
 			const obj = { id: 5, name: "John" };
-			const res = check(obj);
+			const res = await check(obj);
 			expect(res).toBe(true);
 
 			expect(v.rules.number).toHaveBeenCalledTimes(1);
@@ -272,9 +272,9 @@ describe("Test compile (integration test)", () => {
 			expect(check).toBeInstanceOf(Function);
 		});
 
-		it("should call rules validators", () => {
+		it("should call rules validators", async () => {
 			const obj = { id: 5, name: "John" };
-			let res = check(obj);
+			let res = await check(obj);
 			expect(res).toBe(true);
 
 			expect(v.rules.number).toHaveBeenCalledTimes(1);
@@ -298,8 +298,8 @@ describe("Test compile (integration test)", () => {
 
 		let check = v.compile(schema);
 
-		it("should give back one errors", () => {
-			let res = check({id: 5, name: "John" });
+		it("should give back one errors", async () => {
+			let res = await check({id: 5, name: "John" });
 			expect(res).toBeInstanceOf(Array);
 
 			expect(res.length).toBe(1);
@@ -312,8 +312,8 @@ describe("Test compile (integration test)", () => {
 			});
 		});
 
-		it("should give back more errors", () => {
-			let res = check({ password: "123456" });
+		it("should give back more errors", async () => {
+			let res = await check({ password: "123456" });
 			expect(res).toBeInstanceOf(Array);
 
 			expect(res.length).toBe(2);
@@ -325,34 +325,34 @@ describe("Test compile (integration test)", () => {
 
 	describe("Test check generator with custom path & parent", () => {
 
-		it("when schema is defined as an array, and custom path & parent are specified, they should be forwarded to validators", () => {
+		it("when schema is defined as an array, and custom path & parent are specified, they should be forwarded to validators", async () => {
 			const v = new Validator();
 			const customValidator = jest.fn().mockReturnValue(true);	// Will be called with (value, schema, path, parent)
 			v.add("customValidator", customValidator);
 
 			const validate = v.compile([{ type: "customValidator" }]);
 			const parent = {};
-			const res = validate({ customValue: 4711 }, "customPath", parent);
+			const res = await validate({ customValue: 4711 }, "customPath", parent);
 
 			expect(res).toBe(true);
 			expect(customValidator.mock.calls[0][2]).toBe("customPath");
 			expect(customValidator.mock.calls[0][3]).toBe(parent);
 		});
 
-		it("when schema is defined as an array, path & parent should be set to default values in validators", () => {
+		it("when schema is defined as an array, path & parent should be set to default values in validators", async () => {
 			const v = new Validator();
 			const customValidator = jest.fn().mockReturnValue(true);	// Will be called with (value, schema, path, parent)
 			v.add("customValidator", customValidator);
 
 			const validate = v.compile([{ type: "customValidator" }]);
-			const res = validate({ customValue: 4711 });
+			const res = await validate({ customValue: 4711 });
 
 			expect(res).toBe(true);
 			expect(customValidator.mock.calls[0][2]).toBeUndefined();
 			expect(customValidator.mock.calls[0][3]).toBeNull();
 		});
 
-		it("when schema is defined as an object, and custom path is specified, it should be forwarded to validators", () => {
+		it("when schema is defined as an object, and custom path is specified, it should be forwarded to validators", async () => {
 			// Note: as the item we validate always must be an object, there is no use
 			// of specifying a custom parent, like for the schema-as-array above.
 			// The parent is currently used in the validator code (only forwarded to the generated
@@ -362,19 +362,19 @@ describe("Test compile (integration test)", () => {
 			v.add("customValidator", customValidator);
 
 			const validate = v.compile({ customValue: { type: "customValidator" } });
-			const res = validate({ customValue: 4711 }, "customPath");
+			const res = await validate({ customValue: 4711 }, "customPath");
 
 			expect(res).toBe(true);
 			expect(customValidator.mock.calls[0][2]).toBe("customPath.customValue");
 		});
 
-		it("when schema is defined as an object, path should be set to default value in validators", () => {
+		it("when schema is defined as an object, path should be set to default value in validators", async () => {
 			const v = new Validator();
 			const customValidator = jest.fn().mockReturnValue(true);	// Will be called with (value, schema, path, parent)
 			v.add("customValidator", customValidator);
 
 			const validate = v.compile({ customValue: { type: "customValidator" } });
-			const res = validate({ customValue: 4711 });
+			const res = await validate({ customValue: 4711 });
 
 			expect(res).toBe(true);
 			expect(customValidator.mock.calls[0][2]).toBe("customValue");
@@ -396,7 +396,7 @@ describe("Test nested schema", () => {
 	};
 	let check = v.compile(schema);
 
-	it("should give true if obj is valid", () => {
+	it("should give true if obj is valid", async () => {
 		let obj = {
 			id: 3,
 			name: "John",
@@ -407,12 +407,12 @@ describe("Test nested schema", () => {
 			}
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give errors (flatten)", () => {
+	it("should give errors (flatten)", async () => {
 		let obj = {
 			id: 0,
 			name: "John",
@@ -422,7 +422,7 @@ describe("Test nested schema", () => {
 			}
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res.length).toBe(3);
 		expect(res[0].type).toBe("numberPositive");
@@ -449,7 +449,7 @@ describe("Test 3 level nested schema", () => {
 	};
 	let check = v.compile(schema);
 
-	it("should give true if obj is valid", () => {
+	it("should give true if obj is valid", async () => {
 		let obj = {
 			a: {
 				b: {
@@ -458,11 +458,11 @@ describe("Test 3 level nested schema", () => {
 			}
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 		expect(res).toBe(true);
 	});
 
-	it("should give errors (flatten)", () => {
+	it("should give errors (flatten)", async () => {
 		let obj = {
 			a: {
 				b: {
@@ -471,7 +471,7 @@ describe("Test 3 level nested schema", () => {
 			}
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res.length).toBe(1);
 		expect(res[0].type).toBe("stringMin");
@@ -493,7 +493,7 @@ describe("Test nested array", () => {
 	};
 	let check = v.compile(schema);
 
-	it("should give true if obj is valid", () => {
+	it("should give true if obj is valid", async () => {
 		let obj = {
 			arr1: [
 				[
@@ -507,12 +507,12 @@ describe("Test nested array", () => {
 			]
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give error 'not a number'", () => {
+	it("should give error 'not a number'", async () => {
 		let obj = {
 			arr1: [
 				[
@@ -526,14 +526,14 @@ describe("Test nested array", () => {
 			]
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res.length).toBe(1);
 		expect(res[0].type).toBe("number");
 		expect(res[0].field).toBe("arr1[1][0]");
 	});
 
-	it("should give error 'empty array'", () => {
+	it("should give error 'empty array'", async () => {
 		let obj = {
 			arr1: [
 				[
@@ -545,7 +545,7 @@ describe("Test nested array", () => {
 			]
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res.length).toBe(1);
 		expect(res[0].type).toBe("arrayEmpty");
@@ -566,7 +566,7 @@ describe("Test 3-level array", () => {
 	};
 	let check = v.compile(schema);
 
-	it("should give true if obj is valid", () => {
+	it("should give true if obj is valid", async () => {
 		let obj = {
 			arr1: [
 				[
@@ -579,12 +579,12 @@ describe("Test 3-level array", () => {
 			]
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give error 'not a string'", () => {
+	it("should give error 'not a string'", async () => {
 		let obj = {
 			arr1: [
 				[
@@ -597,7 +597,7 @@ describe("Test 3-level array", () => {
 			]
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res.length).toBe(1);
 		expect(res[0].type).toBe("string");
@@ -618,28 +618,28 @@ describe("Test multiple rules", () => {
 
 	let check = v.compile(schema);
 
-	it("should give true if value is string", () => {
+	it("should give true if value is string", async () => {
 		let obj = { value: "John" };
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give true if value is boolean", () => {
+	it("should give true if value is boolean", async () => {
 		let obj = { value: true };
-		let res = check(obj);
+		let res = await check(obj);
 		expect(res).toBe(true);
 
 		obj = { value: false };
-		res = check(obj);
+		res = await check(obj);
 		expect(res).toBe(true);
 	});
 
-	it("should give error if the value is not string and not boolean", () => {
+	it("should give error if the value is not string and not boolean", async () => {
 		let obj = { value: 100 };
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res.length).toBe(2);
 		expect(res[0].type).toBe("string");
@@ -649,9 +649,9 @@ describe("Test multiple rules", () => {
 		expect(res[1].field).toBe("value");
 	});
 
-	it("should give error if the value is a too short string", () => {
+	it("should give error if the value is a too short string", async () => {
 		let obj = { value: "Al" };
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res.length).toBe(2);
 		expect(res[0].type).toBe("stringMin");
@@ -662,7 +662,7 @@ describe("Test multiple rules", () => {
 
 	});
 
-	it("should work with optional", () => {
+	it("should work with optional", async () => {
 
 		let schemaOptional = {
 			a: [
@@ -675,7 +675,7 @@ describe("Test multiple rules", () => {
 
 
 		let obj = {};
-		let res = checkOptional(obj);
+		let res = await checkOptional(obj);
 
 		expect(res).toBe(true);
 	});
@@ -706,35 +706,35 @@ describe("Test multiple rules with objects", () => {
 
 	let check = v.compile(schema);
 
-	it("should give true if first object is given", () => {
+	it("should give true if first object is given", async () => {
 		let obj = { list: {
 			name: "Joe",
 			age: 34
 		} };
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give true if second object is given", () => {
+	it("should give true if second object is given", async () => {
 		let obj = { list: {
 			country: "germany",
 			code: "de"
 		}};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give error if the object is broken", () => {
+	it("should give error if the object is broken", async () => {
 		let obj = { list: {
 			name: "Average",
 			age: "Joe"
 		} };
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(3);
@@ -745,9 +745,9 @@ describe("Test multiple rules with objects", () => {
 		expect(res[1].field).toBe("list.country");
 	});
 
-	it("should give error if the object is only partly given", () => {
+	it("should give error if the object is only partly given", async () => {
 		let obj = { list: {} };
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(4);
@@ -788,14 +788,14 @@ describe("Test multiple rules with objects within array", () => {
 
 	let check = v.compile(schema);
 
-	it("should give true if one valid object is given", () => {
+	it("should give true if one valid object is given", async () => {
 		let obj = { list: [
 			{
 				name: "Joe",
 				age: 34
 			}
 		]};
-		let res = check(obj);
+		let res = await check(obj);
 		expect(res).toBe(true);
 
 		let obj2 = { list: [
@@ -804,11 +804,11 @@ describe("Test multiple rules with objects within array", () => {
 				code: "de"
 			}
 		]};
-		let res2 = check(obj2);
+		let res2 = await check(obj2);
 		expect(res2).toBe(true);
 	});
 
-	it("should give true if three valid objects given", () => {
+	it("should give true if three valid objects given", async () => {
 		let obj = { list: [
 			{
 				name: "Joe",
@@ -823,11 +823,11 @@ describe("Test multiple rules with objects within array", () => {
 				code: "hu"
 			}
 		]};
-		let res = check(obj);
+		let res = await check(obj);
 		expect(res).toBe(true);
 	});
 
-	it("should give error if one object is broken", () => {
+	it("should give error if one object is broken", async () => {
 		let obj = { list: [
 			{
 				name: "Joe",
@@ -842,7 +842,7 @@ describe("Test multiple rules with objects within array", () => {
 			}
 		]};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(3);
@@ -853,7 +853,7 @@ describe("Test multiple rules with objects within array", () => {
 		expect(res[1].field).toBe("list[1].age");
 	});
 
-	it("should give error if one object is empty", () => {
+	it("should give error if one object is empty", async () => {
 		let obj = { list: [
 			{
 				name: "Joe",
@@ -867,7 +867,7 @@ describe("Test multiple rules with objects within array", () => {
 			}
 		]};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(4);
@@ -893,16 +893,16 @@ describe("Test multiple rules with mixed types", () => {
 
 	let check = v.compile(schema);
 
-	it("should give true if string", () => {
-		expect(check({ value: "John" })).toBe(true);
+	it("should give true if string", async () => {
+		expect(await check({ value: "John" })).toBe(true);
 	});
 
-	it("should give true if boolean", () => {
-		expect(check({ value: false })).toBe(true);
+	it("should give true if boolean", async () => {
+		expect(await check({ value: false })).toBe(true);
 	});
 
-	it("should give error if number", () => {
-		const res = check({ value: 100 });
+	it("should give error if number", async () => {
+		const res = await check({ value: 100 });
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(2);
@@ -912,9 +912,9 @@ describe("Test multiple rules with mixed types", () => {
 		expect(res[1].field).toBe("value");
 	});
 
-	it("should give error if 'undefined'", () => {
+	it("should give error if 'undefined'", async () => {
 		debugger; // eslint-disable-line
-		const res = check({ value: undefined });
+		const res = await check({ value: undefined });
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(2);
@@ -944,26 +944,26 @@ describe("Test multiple rules with arrays", () => {
 
 	let check = v.compile(schema);
 
-	it("should give true if first array is given", () => {
+	it("should give true if first array is given", async () => {
 		let obj = { list: ["hello", "there", "this", "is", "a", "test"] };
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give true if second array is given", () => {
+	it("should give true if second array is given", async () => {
 		let obj = { list: [1, 3, 3, 7] };
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give error if the array is broken", () => {
+	it("should give error if the array is broken", async () => {
 		let obj = { list: ["hello", 3] };
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(2);
@@ -974,9 +974,9 @@ describe("Test multiple rules with arrays", () => {
 		expect(res[1].field).toBe("list[0]");
 	});
 
-	it("should give error if the array is broken", () => {
+	it("should give error if the array is broken", async () => {
 		let obj = { list: [true, false] };
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(4);
@@ -1006,26 +1006,26 @@ describe("Test multiple array in root", () => {
 
 	let check = v.compile(schema);
 
-	it("should give true if first array is given", () => {
+	it("should give true if first array is given", async () => {
 		let obj = ["hello", "there", "this", "is", "a", "test"];
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give true if second array is given", () => {
+	it("should give true if second array is given", async () => {
 		let obj = [1, 3, 3, 7];
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give error if the array is broken", () => {
+	it("should give error if the array is broken", async () => {
 		let obj = ["hello", 3];
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(2);
@@ -1036,9 +1036,9 @@ describe("Test multiple array in root", () => {
 		expect(res[1].field).toBe("[0]");
 	});
 
-	it("should give error if the array is broken", () => {
+	it("should give error if the array is broken", async () => {
 		let obj = [true, false];
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(4);
@@ -1055,7 +1055,7 @@ describe("Test multiple array in root", () => {
 describe("Test object without props", () => {
 	const v = new Validator();
 
-	it("should compile and validate", () => {
+	it("should compile and validate", async () => {
 		const schema = {
 			valid: { type: "object" }
 		};
@@ -1063,7 +1063,7 @@ describe("Test object without props", () => {
 		const check = v.compile(schema);
 		expect(check).toBeInstanceOf(Function);
 
-		const res = check({ valid: { a: "b" } });
+		const res = await check({ valid: { a: "b" } });
 		expect(res).toBe(true);
 	});
 });
@@ -1071,7 +1071,7 @@ describe("Test object without props", () => {
 describe("Test array without items", () => {
 	const v = new Validator();
 
-	it("should compile and validate", () => {
+	it("should compile and validate", async () => {
 		const schema = {
 			valid: { type: "array" }
 		};
@@ -1079,7 +1079,7 @@ describe("Test array without items", () => {
 		const check = v.compile(schema);
 		expect(check).toBeInstanceOf(Function);
 
-		const res = check({ valid: [1, 2, 3] });
+		const res = await check({ valid: [1, 2, 3] });
 		expect(res).toBe(true);
 	});
 });
@@ -1098,7 +1098,7 @@ describe("Test recursive/cyclic schema", () => {
 		}
 	});
 
-	it("should compile and validate", () => {
+	it("should compile and validate", async () => {
 		let category = {};
 		Object.assign(category, {
 			name: "top",
@@ -1114,12 +1114,12 @@ describe("Test recursive/cyclic schema", () => {
 			]
 		});
 
-		const res = v.validate(category, schema);
+		const res = await v.validate(category, schema);
 
 		expect(res).toBe(true);
 	});
 
-	it("should give error if nested object is broken", () => {
+	it("should give error if nested object is broken", async () => {
 		const category = {
 			name: "top",
 			subcategories: [
@@ -1133,7 +1133,7 @@ describe("Test recursive/cyclic schema", () => {
 			]
 		};
 
-		const res = v.validate(category, schema);
+		const res = await v.validate(category, schema);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(1);
@@ -1144,28 +1144,28 @@ describe("Test recursive/cyclic schema", () => {
 
 describe("Test irregular object property names", () => {
 	const v = new Validator();
-	it("should compile schema with dash", () => {
+	it("should compile schema with dash", async () => {
 		const schema = {
 			"1-1": { type: "string" },
 		};
 
-		const res = v.validate({
+		const res = await v.validate({
 			"1-1": "test",
 		}, schema);
 		expect(res).toBe(true);
 	});
 
-	it("should compile schema with quotes", () => {
+	it("should compile schema with quotes", async () => {
 		const schema = {
 			"a'bc": { type: "string" },
 			"a\"bc": { type: "string" },
 		};
 
-		const res = v.validate({ "a'bc": "test", "a\"bc": "test" }, schema);
+		const res = await v.validate({ "a'bc": "test", "a\"bc": "test" }, schema);
 		expect(res).toBe(true);
 	});
 
-	it("should compile schema with linebreak", () => {
+	it("should compile schema with linebreak", async () => {
 		const schema = {
 			"a\nbc\ndef": { type: "string" },
 			"a\rbc": { type: "string" },
@@ -1173,7 +1173,7 @@ describe("Test irregular object property names", () => {
 			"a\u2029bc": { type: "string" },
 		};
 
-		const res = v.validate({
+		const res = await v.validate({
 			"a\nbc\ndef": "test",
 			"a\rbc": "test",
 			"a\u2028bc": "test",
@@ -1182,16 +1182,16 @@ describe("Test irregular object property names", () => {
 		expect(res).toBe(true);
 	});
 
-	it("should compile schema with escape characters", () => {
+	it("should compile schema with escape characters", async () => {
 		const schema = {
 			"\\o/": { type: "string" },
 		};
 
-		const res = v.validate({ "\\o/": "test" }, schema);
+		const res = await v.validate({ "\\o/": "test" }, schema);
 		expect(res).toBe(true);
 	});
 
-	it("should compile schema with reserved keyword", () => {
+	it("should compile schema with reserved keyword", async () => {
 		// Reserved keywords are permitted as unquoted property names in ES5+. There is no special support for these
 		const schema = {
 			for: { type: "string" },
@@ -1200,7 +1200,7 @@ describe("Test irregular object property names", () => {
 			try: { type: "string" },
 		};
 
-		const res = v.validate({
+		const res = await v.validate({
 			for: "hello",
 			goto: "hello",
 			var: "test",
@@ -1220,13 +1220,13 @@ describe("Test $$strict schema restriction on root-level", () => {
 
 	let check = v.compile(schema);
 
-	it("should give error if the object contains additional properties on the root-level", () => {
+	it("should give error if the object contains additional properties on the root-level", async () => {
 		let obj = {
 			name: "test",
 			additionalProperty: "additional"
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(1);
@@ -1251,7 +1251,7 @@ describe("Test $$strict schema restriction on root-level for nested objects", ()
 
 	let check = v.compile(schema);
 
-	it("should give error if the object contains additional properties on the root-level", () => {
+	it("should give error if the object contains additional properties on the root-level", async () => {
 		let obj = {
 			name: "test",
 			object: {
@@ -1260,7 +1260,7 @@ describe("Test $$strict schema restriction on root-level for nested objects", ()
 			additionalProperty: "additional"
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(1);
@@ -1284,7 +1284,7 @@ describe("Test $$strict schema restriction on sub-level", () => {
 
 	let check = v.compile(schema);
 
-	it("should give error if the object contains additional properties on the sub-level", () => {
+	it("should give error if the object contains additional properties on the sub-level", async () => {
 		let obj = {
 			address: {
 				street: "test",
@@ -1292,7 +1292,7 @@ describe("Test $$strict schema restriction on sub-level", () => {
 			}
 		};
 
-		let res = check(obj);
+		let res = await check(obj);
 
 		expect(res).toBeInstanceOf(Array);
 		expect(res.length).toBe(1);

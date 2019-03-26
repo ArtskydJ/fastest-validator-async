@@ -59,30 +59,38 @@ const schema2 = {
 	}
 };
 
-bench.ref("compile & validate", () => {
-	const res = v.validate(obj, schema);
-	if (res !== true)
-		throw new Error("Validation error!", res);
+bench.ref("compile & validate", done => {
+	v.validate(obj, schema).then(res => {
+		if (res !== true)
+			throw new Error("Validation error!", res);
+		done()
+	});
 });
 
-bench.add("compile & validate with custom messages", () => {
-	const res = v.validate(obj, schema2);
-	if (res !== true)
-		throw new Error("Validation error!", res);
+bench.add("compile & validate with custom messages", done => {
+	v.validate(obj, schema2).then(res => {
+		if (res !== true)
+			throw new Error("Validation error!", res);
+		done()
+	});
 });
 
 const check = v.compile(schema);
 
-bench.add("validate with pre-compiled schema", () => {
-	const res = check(obj);
-	if (res !== true)
-		throw new Error("Validation error!", res);
+bench.add("validate with pre-compiled schema", done => {
+	check(obj).then(res => {
+		if (res !== true)
+			throw new Error("Validation error!", res);
+		done()
+	})
 });
 
-bench.add("validate with wrong obj", () => {
-	const res = check(wrongObj);
-	if (res === true)
-		throw new Error("Validation error!", res);
+bench.add("validate with wrong obj", done => {
+	check(wrongObj).then(res => {
+		if (res === true)
+			throw new Error("Validation error!", res);
+		done()
+	})
 });
 
 bench.run();

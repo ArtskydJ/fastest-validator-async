@@ -5,35 +5,35 @@ const v = new Validator();
 
 describe("Test custom messages", () => {
 
-	it("should give back not a string message", () => {
+	it("should give back not a string message", async () => {
 
 		const message = "That wasn't a string!";
 		const s = { name: { type: "string", messages: { string: message } } };
 
-		expect(v.validate({ name: 123 }, s)).toEqual([{ type: "string", expected: undefined, actual: undefined, field: "name", message }]);
+		expect(await v.validate({ name: 123 }, s)).toEqual([{ type: "string", expected: undefined, actual: undefined, field: "name", message }]);
 
 	});
 
-	it("should give back required message", () => {
+	it("should give back required message", async () => {
 
 		const message = "Your name is required!";
 
 		const s = { name: { type: "string", messages: { required: message } } };
 
-		expect(v.validate({}, s)).toEqual([{ type: "required", expected: undefined, actual: undefined, field: "name", message: message }]);
+		expect(await v.validate({}, s)).toEqual([{ type: "required", expected: undefined, actual: undefined, field: "name", message: message }]);
 
 	});
 
-	it("should do replacements in custom messages", () => {
+	it("should do replacements in custom messages", async () => {
 
 		const message = "Incorrect name length. Your field: {field} had {actual} chars when it should have no more than {expected}";
 		const s = { name: { type: "string", max: 2, messages: { stringMax: message } } };
 
-		expect(v.validate({ name: "Long string" }, s)).toEqual([{ type: "stringMax", expected: 2, actual: 11, field: "name", message: "Incorrect name length. Your field: name had 11 chars when it should have no more than 2" }]);
+		expect(await v.validate({ name: "Long string" }, s)).toEqual([{ type: "stringMax", expected: 2, actual: 11, field: "name", message: "Incorrect name length. Your field: name had 11 chars when it should have no more than 2" }]);
 
 	});
 
-	it("should do custom messages in arrays", () => {
+	it("should do custom messages in arrays", async () => {
 
 		const s = {
 			cache: [
@@ -42,11 +42,11 @@ describe("Test custom messages", () => {
 			]
 		};
 
-		expect(v.validate({ cache: 123 }, s)).toEqual([{ type: "string", field: "cache", message: "Not a string" }, { type: "boolean", field: "cache", message: "Not a boolean" }]);
+		expect(await v.validate({ cache: 123 }, s)).toEqual([{ type: "string", field: "cache", message: "Not a string" }, { type: "boolean", field: "cache", message: "Not a boolean" }]);
 
 	});
 
-	it("should do custom messages in objects", () => {
+	it("should do custom messages in objects", async () => {
 
 		const s = {
 			users: {
@@ -62,7 +62,7 @@ describe("Test custom messages", () => {
 			}
 		};
 
-		expect(v.validate({
+		expect(await v.validate({
 			users: [
 				{ id: "test", name: "John", status: true },
 				{ id: 2, name: 123, status: true },
@@ -72,7 +72,7 @@ describe("Test custom messages", () => {
 
 	});
 
-	it("should do custom messages when compiled", () => {
+	it("should do custom messages when compiled", async () => {
 		const s = {
 			users: {
 				type: "array",
@@ -89,7 +89,7 @@ describe("Test custom messages", () => {
 
 		const check = v.compile(s);
 
-		expect(check({
+		expect(await check({
 			users: [
 				{ id: "test", name: "John", status: true },
 				{ id: 2, name: 123, status: true },
