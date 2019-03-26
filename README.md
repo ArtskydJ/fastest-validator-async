@@ -6,7 +6,7 @@ This is a fork of [fastest-validator](https://github.com/icebob/fastest-validato
 **Note:** All transpilation has been dropped.  This library will only work in Node ^7.2.0 and major browsers.  RIP IE11.
 
 # How fast?
-Not very fast! ~165k validations/sec (on Intel i7-6700, Node.JS: 9.2.0)
+Not very fast! ~165k validations/sec (on Intel i7-6700, Node.JS: 9.2.0).  Compared to fastest-validator:
 ```
 √ compile & validate*                               -50%
 √ compile & validate with custom messages*          -40%
