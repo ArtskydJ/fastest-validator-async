@@ -1,6 +1,4 @@
 import commonjs from "rollup-plugin-commonjs";
-import uglify from "rollup-plugin-uglify-es";
-import pkg from "./package.json";
 
 const BUNDLE_NAME = "FastestValidator";
 
