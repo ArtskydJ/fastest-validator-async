@@ -2,7 +2,7 @@
   "name": "fastest-validator-async",
   "version": "0.6.17",
   "description": "A much slower version of the fastest JS validator library for NodeJS",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "bench": "node benchmark/index.js",
     "build": "rollup -c",
